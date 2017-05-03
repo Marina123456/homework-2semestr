@@ -1,0 +1,299 @@
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Эмоциональная корзина</title>	
+		<link href="https://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet"> 		
+	</head>
+
+	<body>
+		<style>
+			body {
+				background: url('img/fon.png'); 
+				background-size: cover;
+			}
+			.header {
+				padding-top: 20px;				
+				position: relative;
+				height: 110px;
+				width: 80%;
+				margin:auto;
+			}
+			.name-shop {
+				width: calc(100% - 106px);
+				float: left;
+				font-family: 'PT Sans', sans-serif;
+				font-size: 20px;
+				text-transform: uppercase;
+				color: white;
+			}
+			.basket {
+				position: relative;
+				float: right;
+				text-align: center;
+				height: 100px;
+				width: 100px;
+				text-decoration: none;
+			}
+			.img-basket {
+				height: 50px;
+				width: 51px;
+			}
+			.container {
+				display: flex;
+				flex-wrap: wrap;
+				width: 80%;
+				margin:auto;
+			}
+			.product {
+				background-color: white;
+				width: 264px;
+				height: 300px;
+				text-align: center;
+				margin-top: 1px;
+				margin-left: 1px;
+				margin-right: 1px;
+				/*border: solid transparent 1px;*/
+			}
+			.product:hover {
+				box-shadow: 0px 2px 12px grey;
+				cursor: pointer;
+			}			
+			.product div,.basket-total {
+				font-family: 'PT Sans', sans-serif;
+				font-size: 14px;
+				text-transform: uppercase;
+				color: grey;
+			}
+			.basket-total {
+				font-size: 13px;
+				color:white;
+			}
+			.product div:after, .basket-total:after, .product-in-basket div:after {
+				content: "\20BD";
+				font-family: 'PT Sans', sans-serif;
+			}
+			.product .img-ava {
+				object-fit: contain;
+				height: 250px;
+				width: 250px;
+			}
+
+			.basket-popup {
+				position: absolute;
+				background: rgba(0,0,0,.5);
+				top: 0;
+				left: 0;
+				
+				width: 100%;
+				min-height: 100%;
+				display: none;
+				z-index: 2;
+			}
+			.basket-popup:target {
+				display: block;
+			}
+			.basket-close {
+				color: white;
+				font-size: 30px;
+				float: right;
+				margin-right: 20px;
+				text-decoration: none;
+
+			}
+			.basket-content {
+				width: 90%;
+				margin: auto;
+				display: flex;
+				flex-direction: column;
+				margin-top: 45px;
+			}
+			.product-in-basket {
+				background-color: white;
+				height: 100px;
+				width: 100%; 
+				text-align: center;
+				border-bottom: solid grey 1px;
+			}
+			.product-in-basket div{
+				position: relative;
+				font-size: 14px;
+				font-family: 'PT Sans', sans-serif;
+				color: grey;
+				text-transform: uppercase;				
+				top: 30px;
+			}
+
+			.product-in-basket .img-ava {
+				position: relative;
+				width: 50px;
+				height: 50px;
+				object-fit: contain;
+				left: -45%;
+				top: -15px;
+
+			}
+			.drop-source {
+				background-color: transparent;
+				border: none;
+				position: relative;
+				top: -80px;
+				height: 110px;			
+    			width: 100px;
+				color: transparent;
+				cursor: pointer;
+				outline: none;
+
+			}
+			.drop-source : focus{
+				border: none;
+			}
+			.drop-source::selection {
+				background-color: transparent;
+
+			}
+		</style>
+		<div id="show-basket" class="basket-popup">
+				<a href="#close" class="basket-close">&#10060;</a>
+				<div class="basket-content">
+					
+				</div>
+		</div>
+		<div class="header">
+			<h2 class="name-shop">Магазин сладостей (перетащите товары в корзину)</h2>
+
+			<a href="#show-basket" class="basket">
+				<img class="img-basket" src="img/no_product.png">
+				<div class="basket-total">0</div>
+				<input class="drop-source">
+			</a>
+			
+			
+		</div>
+		
+		<div class="container">
+			
+		</div>
+		<script>
+			let products=[ {'name':'конфета','price':120,'photo_path':'https://shop.common.kz/upload/iblock/ca6/ca63d8738a643e8900e4d8c85bf441d7.png'},
+						{'name':'шоколад','price':140,'photo_path':'http://guruvkuss.ru/images/schokolate.png'},
+						{'name':'мороженое','price':150,'photo_path':'http://img-fotki.yandex.ru/get/5605/cadi-1986.308/0_78010_2301878a_L.jpg'},
+						{'name':'мороженое','price':150,'photo_path':'http://img-fotki.yandex.ru/get/5605/cadi-1986.308/0_78010_2301878a_L.jpg'},
+						{'name':'мороженое','price':150,'photo_path':'http://img-fotki.yandex.ru/get/5605/cadi-1986.308/0_78010_2301878a_L.jpg'},
+						{'name':'мороженое','price':150,'photo_path':'http://img-fotki.yandex.ru/get/5605/cadi-1986.308/0_78010_2301878a_L.jpg'},
+						{'name':'мармелад','price':160,'photo_path':'http://www.bravo-kaz.ru/CMSPages/GetBizFormFile.aspx?filename=b4c5bc2a-3775-40d4-8266-19087da630fe.png&maxsidewidth=250'},
+						{'name':'вафли','price':160,'photo_path':'http://lumcol.ru/thumb/B9HFY_ftzcGmPcDT2iZU4A/580r450/870301/vafli2.png'} ];
+			let productsInBasket = [];
+
+			function drawAll(containerClass,itemClass,arrSource){
+					let container=document.querySelector('.'+containerClass);
+					container.innerHTML='';
+					arrSource.forEach( (product, i, arrSource)=>{
+						let newProduct=document.createElement("div");
+							newProduct.setAttribute('class',itemClass);
+							newProduct.setAttribute('id',i);
+						let productText = document.createElement("div");
+							productText.setAttribute('class',itemClass+'-text');
+						let textname = document.createTextNode(product.name); 
+							productText.appendChild(textname);
+						let br=document.createElement("br");
+							productText.appendChild(br); 
+						let textprice = document.createTextNode(product.price); 
+							productText.appendChild(textprice); 
+							newProduct.appendChild(productText);      
+						let imgAva = document.createElement('img'); 
+							imgAva.setAttribute('src',product.photo_path);
+							imgAva.setAttribute('class','img-ava');  
+							newProduct.appendChild(imgAva); 
+						                        
+						container.appendChild(newProduct); 
+					});
+			}
+			drawAll('container','product',products);
+
+			
+
+			const localEvents = {query:"addProduct", response:"productResult"},
+    			   statuses = ["no_product", "productInBasket"],
+    				CLIENT = document.querySelector(`.container`),
+    				SERVER = document.querySelector(`.basket`);
+
+
+    		function createMessage(eventTitle='testEvent', content='test', sender=null){
+				      return new CustomEvent( eventTitle, {
+				             detail: {content, sender},
+				             bubbles: false  
+				      });
+  			}
+			function sendMessage(params){
+			    let e = createMessage( params.title, params.content,  params.sender );
+			      params.where.dispatchEvent( e );        
+			}
+
+			let items=CLIENT.querySelectorAll('.product');  
+			items.forEach( (item, i, items)=>{
+				/*item.addEventListener('click', e => {
+
+					let content;
+					if (e.target.className=="product-text" || e.target.nodeName=='IMG'){
+						content=e.target.parentElement.id
+					} else content=e.target.id;
+					
+				    sendMessage({
+				          where: SERVER,
+				          title: localEvents.query,
+				          content:  content,
+				          sender:  e.target
+				     });
+				})*/
+			});
+
+			items.forEach( (item, i, items)=>{
+				item.addEventListener('dragstart', e => {
+					//if (e.preventDefault) e.preventDefault(); 
+					let content;
+					if (e.target.className=="product-text" || e.target.nodeName=='IMG'){
+						content=e.target.parentElement.id
+					} else content=e.target.id;
+
+					e.dataTransfer.setData('text/html', content);
+				})
+			});
+
+			SERVER.querySelector('.drop-source').addEventListener('drop',e=>{
+				if (e.stopPropagation) e.stopPropagation();
+				
+				sendMessage({
+				          where: SERVER,
+				          title: localEvents.query,
+				          content:  e.dataTransfer.getData('text/html'),
+				          sender:  e.target
+				     });
+			});
+
+			SERVER.addEventListener(localEvents.query, e => {
+			    
+			    let product = products[e.detail.content];
+			    
+			    let basketTotal = +document.querySelector('.basket-total').innerText;
+			    basketTotal+=product.price;
+			    document.querySelector('.basket-total').innerText=basketTotal;
+
+			    if (basketTotal>0) {
+			    	document.querySelector('.img-basket').src='img/'+statuses[1]+'.png';
+			    }
+
+			    productsInBasket.push(product);
+
+			    drawAll('basket-content','product-in-basket',productsInBasket);
+			    
+			});
+			  
+
+			
+			
+					
+
+			
+		</script>
+	</body>
+</html>
