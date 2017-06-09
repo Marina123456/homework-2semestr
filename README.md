@@ -6,7 +6,7 @@
 2. Scorm-пакет
 
 https://marjnazhjrnova.moodlecloud.com
-login: marjnazhjrnova
+login: admin
 пароль: gfhjkm12
 
 3. Контрольный рубеж 
